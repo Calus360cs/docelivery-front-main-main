@@ -1,0 +1,406 @@
+/* Dashboard Container */
+.dashboardContainer {
+  display: flex;
+  height: 100vh;
+  background: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  background: white;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.sidebar.closed {
+  width: 80px;
+}
+
+.sidebarHeader {
+  padding: 25px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background: linear-gradient(135deg, #ff69b4, #8a2be2);
+  color: white;
+}
+
+.sidebarHeader h2 {
+  margin: 0 0 5px 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.sidebarHeader span {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.sidebar.closed .sidebarHeader span {
+  display: none;
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.navItem {
+  width: 100%;
+  padding: 15px 20px;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.navItem:hover {
+  background: #f8fafc;
+  color: #8a2be2;
+}
+
+.navItem.active {
+  background: linear-gradient(135deg, rgba(255, 105, 180, 0.1), rgba(138, 43, 226, 0.1));
+  color: #8a2be2;
+  border-right: 3px solid #8a2be2;
+}
+
+.sidebar.closed .navItem span {
+  display: none;
+}
+
+.sidebarFooter {
+  padding: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.logoutBtn {
+  width: 100%;
+  padding: 12px 15px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.logoutBtn:hover {
+  background: #dc2626;
+}
+
+.sidebar.closed .logoutBtn span {
+  display: none;
+}
+
+/* Main Area */
+.mainArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: white;
+  padding: 20px 30px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.menuToggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.menuToggle:hover {
+  background: #f1f5f9;
+  color: #8a2be2;
+}
+
+.headerLeft h1 {
+  margin: 0 0 5px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.headerLeft p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.statusEntregador {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.statusLabel {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.notificationBtn {
+  position: relative;
+  background: #f8fafc;
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.notificationBtn:hover {
+  background: #e2e8f0;
+  color: #8a2be2;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 8px 15px;
+  border-radius: 25px;
+}
+
+.userInfo {
+  text-align: right;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1e293b;
+}
+
+.userVehicle {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff69b4, #8a2be2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+}
+
+.contentWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Notifications Overlay */
+.notificationsOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 999;
+}
+
+/* Notifications Dropdown */
+.notificationsDropdown {
+  position: fixed;
+  top: 80px;
+  right: 30px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notificationsDropdown h3 {
+  margin: 0;
+  padding: 20px 20px 10px 20px;
+  color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.notificationItem {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f9fafb;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: background 0.2s ease;
+}
+
+.notificationItem:hover {
+  background: #f8fafc;
+}
+
+.notificationItem:last-child {
+  border-bottom: none;
+}
+
+.notificationItem span {
+  color: #374151;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.notificationItem small {
+  color: #6b7280;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  margin-left: 10px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    height: 100vh;
+    z-index: 1000;
+  }
+  
+  .sidebar.open {
+    left: 0;
+  }
+  
+  .mainArea {
+    width: 100%;
+  }
+  
+  .header {
+    padding: 15px 20px;
+  }
+  
+  .headerLeft h1 {
+    font-size: 1.3rem;
+  }
+  
+  .headerLeft p {
+    display: none;
+  }
+  
+  .statusEntregador {
+    display: none;
+  }
+  
+  .content {
+    padding: 20px;
+  }
+  
+  .notificationsDropdown {
+    right: 20px;
+    width: calc(100vw - 40px);
+    max-width: 300px;
+  }
+}
