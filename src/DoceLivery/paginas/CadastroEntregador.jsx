@@ -1,62 +1,81 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Styles from './Formulario.module.css'; 
+import Styles from './Formulario.module.css';
 import logoImage from '../assests/img/doce_Livre_3.jpg';
 import ApiService from '../services/api';
 
+const STEPS = ['Dados Pessoais', 'Veículo', 'Acesso'];
 
-const Cadastro_Entregador = () => {
+const CadastroEntregador = () => {
     const navigate = useNavigate();
-    // Estado atualizado com todos os campos necessários para o Entregador
+    const [step, setStep] = useState(0);
+    const [cepLoading, setCepLoading] = useState(false);
+    const [cepErro, setCepErro] = useState('');
+    const [erro, setErro] = useState('');
+    const [loading, setLoading] = useState(false);
+
     const [formData, setFormData] = useState({
-        nome: '',
-        cpf: '', 
-        cnh: '', 
-        contato: '', 
-        endereco: '', 
-        cep: '', 
-        veiculo: '', 
-        placaVeiculo: '', 
-        email: '',
-        senha: '',
-        confirmarSenha: '',
+        nome: '', cpf: '', cnh: '', contato: '',
+        cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '',
+        veiculo: '', placaVeiculo: '',
+        email: '', senha: '', confirmarSenha: '',
     });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value,
-        }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleCepChange = async (e) => {
+        const cep = e.target.value.replace(/\D/g, '');
+        setFormData(prev => ({ ...prev, cep: e.target.value }));
+        setCepErro('');
+        if (cep.length === 8) {
+            setCepLoading(true);
+            try {
+                const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await res.json();
+                if (data.erro) {
+                    setCepErro('CEP não encontrado.');
+                } else {
+                    setFormData(prev => ({
+                        ...prev,
+                        logradouro: data.logradouro || '',
+                        bairro: data.bairro || '',
+                        cidade: data.localidade || '',
+                        estado: data.uf || '',
+                    }));
+                }
+            } catch {
+                setCepErro('Erro ao buscar CEP.');
+            } finally {
+                setCepLoading(false);
+            }
+        }
+    };
+
+    const nextStep = (e) => { e.preventDefault(); setStep(s => s + 1); };
+    const prevStep = () => setStep(s => s - 1);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        /*if (formData.senha !== formData.confirmarSenha) {
-            alert('As senhas não coincidem!');
+        setErro('');
+        if (formData.senha !== formData.confirmarSenha) {
+            setErro('As senhas não coincidem.');
             return;
-        }*/
-
-        console.log(JSON.stringify(formData));
-
-        var entregador = {
-            nome: formData.nome,
-            cpf : formData.cpf,
-            cnh : formData.cnh,
-            contato : formData.contato,
-            endereco : formData.endereco,
-            cep : formData.cep,
-            veiculo : formData.veiculo,
-            placaVeiculo : formData.placaVeiculo,
-            email : formData.email
-        };
-        
-        ApiService.post('/entregadores', entregador, {});
-
-        console.log('Dados de cadastro do Entregador enviados:', formData);
-        alert('Cadastro de Entregador realizado com sucesso!');
-        navigate('/docelivery/entregador/login-entregador');
+        }
+        setLoading(true);
+        try {
+            const enderecoCompleto = `${formData.logradouro}, ${formData.numero}${formData.complemento ? ', ' + formData.complemento : ''}, ${formData.bairro}, ${formData.cidade} - ${formData.estado}, CEP: ${formData.cep}`;
+            const { confirmarSenha, logradouro, numero, complemento, bairro, cidade, estado, ...rest } = formData;
+            await ApiService.post('/entregadores', { ...rest, endereco: enderecoCompleto }, {});
+            alert('Cadastro realizado com sucesso!');
+            navigate('/docelivery/entregador/login-entregador');
+        } catch {
+            setErro('Erro ao cadastrar. Verifique os dados ou tente novamente.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -64,162 +83,143 @@ const Cadastro_Entregador = () => {
             <div className={Styles.form_card}>
                 <img src={logoImage} alt="DoceLivery Logo" className={Styles.form_logo} />
                 <h2>Cadastre-se como Entregador</h2>
-                <form onSubmit={handleSubmit}>
-                    
-                    {/* Nome Completo */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="nome">Nome Completo</label>
-                        <input
-                            type="text"
-                            id="nome"
-                            name="nome"
-                            value={formData.nome}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    
-                    {/* CPF */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="cpf">CPF</label>
-                        <input
-                            type="text"
-                            id="cpf"
-                            name="cpf"
-                            value={formData.cpf}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
 
-                    {/* CNH */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="cnh">Número da CNH</label>
-                        <input
-                            type="text"
-                            id="cnh"
-                            name="cnh"
-                            value={formData.cnh}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    
-                    {/* Contato */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="contato">Telefone / Contato</label>
-                        <input
-                            type="tel"
-                            id="contato"
-                            name="contato"
-                            value={formData.contato}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
+                    {STEPS.map((label, i) => (
+                        <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                            <div style={{
+                                width: '32px', height: '32px', borderRadius: '50%',
+                                background: i <= step ? '#c71585' : '#e0e0e0',
+                                color: i <= step ? '#fff' : '#999',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontWeight: 'bold', fontSize: '0.85rem', transition: 'all 0.3s'
+                            }}>{i + 1}</div>
+                            <span style={{ fontSize: '0.7rem', color: i === step ? '#c71585' : '#999' }}>{label}</span>
+                        </div>
+                    ))}
+                </div>
 
-                    {/* Endereço */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="endereco">Endereço (Rua, Número, Bairro)</label>
-                        <input
-                            type="text"
-                            id="endereco"
-                            name="endereco"
-                            value={formData.endereco}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                <form onSubmit={step === STEPS.length - 1 ? handleSubmit : nextStep}>
 
-                    {/* CEP */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="cep">CEP</label>
-                        <input
-                            type="text"
-                            id="cep"
-                            name="cep"
-                            value={formData.cep}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    {step === 0 && (
+                        <>
+                            <h3>Dados Pessoais</h3>
+                            <div className={Styles.form_group}>
+                                <label>Nome Completo</label>
+                                <input type="text" name="nome" value={formData.nome} onChange={handleChange} required />
+                            </div>
+                            <div className={Styles.form_row}>
+                                <div className={Styles.form_group}>
+                                    <label>CPF</label>
+                                    <input type="text" name="cpf" value={formData.cpf} onChange={handleChange} placeholder="000.000.000-00" required />
+                                </div>
+                                <div className={Styles.form_group}>
+                                    <label>CNH</label>
+                                    <input type="text" name="cnh" value={formData.cnh} onChange={handleChange} required />
+                                </div>
+                            </div>
+                            <div className={Styles.form_group}>
+                                <label>Telefone / Contato</label>
+                                <input type="tel" name="contato" value={formData.contato} onChange={handleChange} placeholder="(XX) XXXXX-XXXX" required />
+                            </div>
+                        </>
+                    )}
 
-                    {/* Veículo */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="veiculo">Tipo de Veículo (Moto/Carro/Bicicleta)</label>
-                        <input
-                            type="text"
-                            id="veiculo"
-                            name="veiculo"
-                            value={formData.veiculo}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    
-                    {/* Placa do Veículo */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="placaVeiculo">Placa do Veículo</label>
-                        <input
-                            type="text"
-                            id="placaVeiculo"
-                            name="placaVeiculo"
-                            value={formData.placaVeiculo}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    {step === 1 && (
+                        <>
+                            <h3>Dados do Veículo</h3>
+                            <div className={Styles.form_row}>
+                                <div className={Styles.form_group}>
+                                    <label>Tipo de Veículo</label>
+                                    <select name="veiculo" value={formData.veiculo} onChange={handleChange} required>
+                                        <option value="">Selecione</option>
+                                        <option value="Moto">Moto</option>
+                                        <option value="Carro">Carro</option>
+                                        <option value="Bicicleta">Bicicleta</option>
+                                    </select>
+                                </div>
+                                <div className={Styles.form_group}>
+                                    <label>Placa do Veículo</label>
+                                    <input type="text" name="placaVeiculo" value={formData.placaVeiculo} onChange={handleChange} placeholder="ABC-1234" required />
+                                </div>
+                            </div>
+                            <h3>Endereço</h3>
+                            <div className={Styles.form_row}>
+                                <div className={Styles.form_group}>
+                                    <label>CEP</label>
+                                    <input type="text" name="cep" value={formData.cep} onChange={handleCepChange} placeholder="00000-000" maxLength={9} required />
+                                    {cepLoading && <small style={{ color: '#c71585' }}>Buscando CEP...</small>}
+                                    {cepErro && <small style={{ color: 'red' }}>{cepErro}</small>}
+                                </div>
+                                <div className={Styles.form_group}>
+                                    <label>Estado</label>
+                                    <input type="text" name="estado" value={formData.estado} onChange={handleChange} placeholder="UF" maxLength={2} required />
+                                </div>
+                            </div>
+                            <div className={Styles.form_group}>
+                                <label>Logradouro</label>
+                                <input type="text" name="logradouro" value={formData.logradouro} onChange={handleChange} placeholder="Rua, Avenida..." required />
+                            </div>
+                            <div className={Styles.form_row}>
+                                <div className={Styles.form_group}>
+                                    <label>Número</label>
+                                    <input type="text" name="numero" value={formData.numero} onChange={handleChange} required />
+                                </div>
+                                <div className={Styles.form_group}>
+                                    <label>Complemento</label>
+                                    <input type="text" name="complemento" value={formData.complemento} onChange={handleChange} placeholder="Apto, Bloco..." />
+                                </div>
+                            </div>
+                            <div className={Styles.form_row}>
+                                <div className={Styles.form_group}>
+                                    <label>Bairro</label>
+                                    <input type="text" name="bairro" value={formData.bairro} onChange={handleChange} required />
+                                </div>
+                                <div className={Styles.form_group}>
+                                    <label>Cidade</label>
+                                    <input type="text" name="cidade" value={formData.cidade} onChange={handleChange} required />
+                                </div>
+                            </div>
+                        </>
+                    )}
 
-                    {/* Email */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="email">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
+                    {step === 2 && (
+                        <>
+                            <h3>Dados de Acesso</h3>
+                            <div className={Styles.form_group}>
+                                <label>Email</label>
+                                <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                            </div>
+                            <div className={Styles.form_group}>
+                                <label>Senha</label>
+                                <input type="password" name="senha" value={formData.senha} onChange={handleChange} minLength={6} required />
+                            </div>
+                            <div className={Styles.form_group}>
+                                <label>Confirme a Senha</label>
+                                <input type="password" name="confirmarSenha" value={formData.confirmarSenha} onChange={handleChange} minLength={6} required />
+                            </div>
+                            {erro && <p style={{ color: 'red', marginBottom: '8px' }}>{erro}</p>}
+                        </>
+                    )}
+
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                        {step > 0 && (
+                            <button type="button" onClick={prevStep} className={Styles.form_button} style={{ background: '#aaa' }}>
+                                Voltar
+                            </button>
+                        )}
+                        <button type="submit" className={Styles.form_button} disabled={loading}>
+                            {step === STEPS.length - 1 ? (loading ? 'Cadastrando...' : 'Cadastrar') : 'Próximo'}
+                        </button>
                     </div>
-                    
-                    {/* Senha */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="senha">Senha</label>
-                        <input
-                            type="password"
-                            id="senha"
-                            name="senha"
-                            value={formData.senha}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    
-                    {/* Confirme a Senha */}
-                    <div className={Styles.form_group}>
-                        <label htmlFor="confirmarSenha">Confirme a Senha</label>
-                        <input
-                            type="password"
-                            id="confirmarSenha"
-                            name="confirmarSenha"
-                            value={formData.confirmarSenha}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-                    
-                    <button type="submit" className={Styles.form_button}>
-                        Cadastrar
-                    </button>
                 </form>
-                
+
                 <p className={Styles.form_link}>
-                Já tem uma conta? <Link to="/docelivery/entregador/login-entregador">Faça login</Link>
+                    Já tem uma conta? <Link to="/docelivery/entregador/login-entregador">Faça login</Link>
                 </p>
             </div>
         </div>
     );
-}
+};
 
-export default Cadastro_Entregador;
+export default CadastroEntregador;
